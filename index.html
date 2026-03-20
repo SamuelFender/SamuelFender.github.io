@@ -1,0 +1,3477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RailGuard AI — Wabtec | Predictive Rail Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --rail-black: #0a0b0d;
+    --rail-dark: #111318;
+    --rail-panel: #161a22;
+    --rail-border: #1e2530;
+    --amber: #f5a623;
+    --amber-dim: #c47a10;
+    --amber-glow: rgba(245,166,35,0.15);
+    --red-alert: #e03c31;
+    --green-ok: #2ecc71;
+    --steel: #8896a5;
+    --steel-light: #b0bec5;
+    --white: #f0f2f5;
+    --font-head: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--rail-black);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 64px;
+    background: rgba(10,11,13,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rail-border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-head);
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--amber); }
+
+  .nav-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--steel);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--amber); }
+
+  /* ── HERO ── */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 48px 80px;
+    overflow: hidden;
+  }
+
+  .hero-scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    animation: scanDown 6s linear infinite;
+    opacity: 0.4;
+    top: 0;
+  }
+
+  @keyframes scanDown {
+    0%   { top: 0; }
+    100% { top: 100%; }
+  }
+
+  .hero-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  h1 {
+    font-family: var(--font-head);
+    font-size: clamp(72px, 10vw, 140px);
+    line-height: 0.92;
+    letter-spacing: 4px;
+    color: var(--white);
+    max-width: 900px;
+    margin-bottom: 12px;
+  }
+
+  h1 .accent { color: var(--amber); }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--steel-light);
+    max-width: 600px;
+    margin: 28px 0 48px;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  .hero-cta-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--amber);
+    color: var(--rail-black);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(245,166,35,0.35);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 13px 32px;
+    border: 1px solid var(--rail-border);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  /* ── LIVE STATS TICKER ── */
+  .stats-ticker {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--rail-panel);
+    border-top: 1px solid var(--rail-border);
+    padding: 0 48px;
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 40px 20px 0;
+    border-right: 1px solid var(--rail-border);
+    margin-right: 40px;
+    white-space: nowrap;
+  }
+
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 36px;
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--steel);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  /* ── SECTION UTILITIES ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 48px;
+  }
+
+  .section-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-tag::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--amber);
+  }
+
+  h2 {
+    font-family: var(--font-head);
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 1;
+    letter-spacing: 3px;
+    margin-bottom: 24px;
+  }
+
+  h2 .accent { color: var(--amber); }
+
+  /* ── PROBLEM SECTION ── */
+  #problem {
+    background: var(--rail-panel);
+    border-top: 1px solid var(--rail-border);
+    border-bottom: 1px solid var(--rail-border);
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin-top: 60px;
+  }
+
+  .problem-card {
+    background: var(--rail-black);
+    border: 1px solid var(--rail-border);
+    padding: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .problem-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--red-alert);
+  }
+
+  .problem-card h3 {
+    font-family: var(--font-head);
+    font-size: 28px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    color: var(--white);
+  }
+
+  .problem-card p {
+    font-size: 14px;
+    color: var(--steel-light);
+    line-height: 1.8;
+  }
+
+  .problem-card .stat-flag {
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--red-alert);
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    border: 1px solid rgba(224,60,49,0.3);
+    display: inline-block;
+  }
+
+  /* ── THREE PILLARS ── */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 2px;
+    margin-top: 60px;
+    background: var(--rail-border);
+  }
+
+  .pillar {
+    background: var(--rail-black);
+    padding: 48px 36px;
+    position: relative;
+  }
+
+  .pillar-icon {
+    font-size: 36px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .pillar h3 {
+    font-family: var(--font-head);
+    font-size: 32px;
+    letter-spacing: 3px;
+    color: var(--amber);
+    margin-bottom: 16px;
+  }
+
+  .pillar p {
+    font-size: 14px;
+    color: var(--steel-light);
+    line-height: 1.8;
+  }
+
+  .pillar ul {
+    list-style: none;
+    margin-top: 16px;
+  }
+
+  .pillar ul li {
+    font-size: 13px;
+    color: var(--steel);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--rail-border);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+  }
+
+  .pillar ul li::before {
+    content: '→';
+    color: var(--amber);
+    flex-shrink: 0;
+  }
+
+  /* ── DETECT DECIDE ACT ── */
+  #framework {
+    background: var(--rail-black);
+  }
+
+  .dda-row {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .dda-card {
+    background: var(--rail-panel);
+    border: 1px solid var(--rail-border);
+    padding: 36px 28px;
+    position: relative;
+  }
+
+  .dda-num {
+    font-family: var(--font-head);
+    font-size: 80px;
+    color: rgba(245,166,35,0.08);
+    line-height: 1;
+    position: absolute;
+    top: 12px;
+    right: 16px;
+  }
+
+  .dda-card h3 {
+    font-family: var(--font-head);
+    font-size: 36px;
+    letter-spacing: 3px;
+    color: var(--amber);
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .dda-card p {
+    font-size: 14px;
+    color: var(--steel-light);
+    line-height: 1.8;
+    position: relative;
+  }
+
+  /* ── FEATURES ── */
+  #features {
+    background: var(--rail-panel);
+    border-top: 1px solid var(--rail-border);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 2px;
+    margin-top: 60px;
+    background: var(--rail-border);
+  }
+
+  .feature-card {
+    background: var(--rail-black);
+    padding: 36px;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card:hover { background: var(--rail-panel); }
+
+  .feature-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--amber);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+
+  .feature-card:hover::after { transform: scaleX(1); }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--amber-glow);
+    border: 1px solid rgba(245,166,35,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .feature-card h3 {
+    font-family: var(--font-head);
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    color: var(--white);
+  }
+
+  .feature-card p {
+    font-size: 13px;
+    color: var(--steel);
+    line-height: 1.8;
+  }
+
+  .feature-value {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rail-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── EMERGENCY RESPONSE ── */
+  #emergency {
+    background: var(--rail-black);
+    border-top: 1px solid var(--rail-border);
+  }
+
+  .emergency-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    margin-top: 60px;
+    align-items: start;
+  }
+
+  .emergency-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 24px;
+    position: relative;
+  }
+
+  .flow-step:not(:last-child) .flow-line {
+    position: absolute;
+    left: 20px;
+    top: 44px;
+    bottom: -24px;
+    width: 1px;
+    background: linear-gradient(var(--amber), transparent);
+  }
+
+  .flow-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--rail-panel);
+    border: 2px solid var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--amber);
+    flex-shrink: 0;
+    margin-top: 0;
+  }
+
+  .flow-content {
+    padding-bottom: 36px;
+  }
+
+  .flow-content h4 {
+    font-family: var(--font-head);
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .flow-content p {
+    font-size: 13px;
+    color: var(--steel);
+    line-height: 1.7;
+  }
+
+  .pfri-panel {
+    background: var(--rail-panel);
+    border: 1px solid var(--rail-border);
+    padding: 36px;
+  }
+
+  .pfri-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .pfri-bar {
+    margin-bottom: 20px;
+  }
+
+  .pfri-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--steel);
+    margin-bottom: 6px;
+  }
+
+  .pfri-bar-track {
+    height: 6px;
+    background: var(--rail-border);
+    position: relative;
+  }
+
+  .pfri-bar-fill {
+    height: 100%;
+    transition: width 1s ease;
+  }
+
+  .fill-green  { background: var(--green-ok); width: 28%; }
+  .fill-amber  { background: var(--amber); width: 61%; }
+  .fill-red    { background: var(--red-alert); width: 87%; }
+
+  .alert-box {
+    margin-top: 28px;
+    padding: 16px;
+    background: rgba(224,60,49,0.08);
+    border: 1px solid rgba(224,60,49,0.3);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .alert-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--red-alert);
+    border-radius: 50%;
+    margin-top: 6px;
+    animation: blink 1s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .alert-box p {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--steel-light);
+    line-height: 1.6;
+  }
+
+  /* ── NETWORK MAP ── */
+  #network {
+    background: var(--rail-panel);
+    border-top: 1px solid var(--rail-border);
+  }
+
+  .network-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .network-card {
+    background: var(--rail-black);
+    border: 1px solid var(--rail-border);
+    padding: 28px;
+  }
+
+  .network-card h3 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 16px;
+  }
+
+  .network-list {
+    list-style: none;
+  }
+
+  .network-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rail-border);
+    font-size: 14px;
+    color: var(--steel-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .network-list li:last-child { border-bottom: none; }
+
+  .network-list li .flag { color: var(--amber); font-size: 16px; }
+
+  .network-note {
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--steel);
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    border-left: 2px solid var(--amber);
+    background: var(--amber-glow);
+  }
+
+  /* ── METRICS TABLE ── */
+  #metrics {
+    background: var(--rail-black);
+    border-top: 1px solid var(--rail-border);
+  }
+
+  .metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 60px;
+    font-size: 13px;
+  }
+
+  .metrics-table th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--amber);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--rail-border);
+    background: var(--rail-panel);
+  }
+
+  .metrics-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--rail-border);
+    color: var(--steel-light);
+    vertical-align: top;
+  }
+
+  .metrics-table tr:hover td { background: var(--rail-panel); }
+
+  .metric-target {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--amber);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--rail-panel);
+    border-top: 1px solid var(--rail-border);
+    padding: 60px 48px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--rail-border);
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .footer-brand {
+    font-family: var(--font-head);
+    font-size: 40px;
+    letter-spacing: 4px;
+    color: var(--white);
+  }
+
+  .footer-brand span { color: var(--amber); }
+
+  .footer-brand p {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--steel);
+    font-weight: 300;
+    letter-spacing: normal;
+    margin-top: 8px;
+    max-width: 320px;
+    line-height: 1.7;
+  }
+
+  .footer-col h4 {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .footer-col ul {
+    list-style: none;
+  }
+
+  .footer-col ul li {
+    font-size: 13px;
+    color: var(--steel);
+    padding: 5px 0;
+  }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--steel);
+    letter-spacing: 1px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ── 3D MODEL SECTION ── */
+  #model-section {
+    background: var(--rail-black);
+    border-top: 1px solid var(--rail-border);
+    padding: 80px 0;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  #model-section .inner { padding: 0 48px 40px; }
+
+  model-viewer {
+    width: 100%;
+    height: 480px;
+    background: transparent;
+    --poster-color: transparent;
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; }
+    nav .nav-links { display: none; }
+    section { padding: 60px 20px; }
+    #hero { padding: 100px 20px 60px; }
+    h1 { font-size: 64px; }
+    .problem-grid,
+    .pillars,
+    .dda-row,
+    .features-grid,
+    .emergency-layout,
+    .network-grid { grid-template-columns: 1fr; }
+    .stats-ticker { padding: 0 20px; flex-wrap: wrap; }
+    .stat-item { border-right: none; }
+    footer { padding: 40px 20px; }
+    .footer-top { flex-direction: column; }
+    .metrics-table { font-size: 12px; }
+    .metrics-table th, .metrics-table td { padding: 10px 12px; }
+    model-viewer { height: 300px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Rail<span>Guard</span> AI <span class="nav-badge" style="margin-left:8px;font-size:9px;">WABTEC</span></a>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#framework">Framework</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#emergency">Response</a></li>
+    <li><a href="#network">Network</a></li>
+    <li><a href="#metrics">Metrics</a></li>
+    <li><a href="#" onclick="openOpsCenter(event)" style="color:var(--amber);border:1px solid var(--amber);padding:6px 14px;">⬡ OPS CENTER</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-scan-line"></div>
+  <div class="hero-tag">Wabtec × RailGuard AI — PRD v2.0</div>
+  <h1>DETECT.<br/><span class="accent">DECIDE.</span><br/>PROTECT.</h1>
+  <p class="hero-sub">Autonomous drone intelligence, edge-computing diagnostics, and AI-driven predictive analytics — transforming America's freight rail from reactive crisis to proactive safety.</p>
+  <div class="hero-cta-row">
+    <a href="#framework" class="btn-primary">View Framework</a>
+    <a href="#features" class="btn-outline">Explore Features</a>
+  </div>
+
+  <div class="stats-ticker">
+    <div class="stat-item">
+      <div>
+        <div class="stat-num" style="font-size:22px;">$45K</div>
+        <div class="stat-label" style="font-size:9px;">Cost per 5-hr<br/>locomotive failure</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div>
+        <div class="stat-num" style="font-size:22px;">40%</div>
+        <div class="stat-label" style="font-size:9px;">Annual profits lost<br/>to reactive maintenance</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div>
+        <div class="stat-num" style="font-size:22px;">95%</div>
+        <div class="stat-label" style="font-size:9px;">Target AI defect<br/>detection accuracy</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div>
+        <div class="stat-num" style="font-size:22px;">75%</div>
+        <div class="stat-label" style="font-size:9px;">Reduction in<br/>detection time</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div>
+        <div class="stat-num" style="font-size:22px;">0</div>
+        <div class="stat-label" style="font-size:9px;">Target broken rail<br/>derailments (2 yrs)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THREE PILLARS -->
+<!-- DETECT DECIDE ACT EXPLAIN -->
+<section id="framework">
+  <div class="section-tag">Operational Framework</div>
+  <h2>THE <span class="accent">RAILGUARD</span> LOOP</h2>
+  <p style="max-width:600px;color:var(--steel-light);font-size:15px;">Every second of operation, RailGuard AI cycles through four integrated phases — transforming raw sensor data into decisive action.</p>
+
+  <div class="dda-row fade-in">
+    <div class="dda-card">
+      <div class="dda-num">01</div>
+      <h3>DETECT</h3>
+      <p>Autonomous drones patrol assigned rail corridors on scheduled intervals, capturing high-resolution visual, thermal, and LiDAR data. Simultaneously, onboard sensors monitor bearing temperature, vibration, brake pressure, and structural stress across every locomotive and freight car — mile by mile.</p>
+    </div>
+    <div class="dda-card">
+      <div class="dda-num">02</div>
+      <h3>DECIDE</h3>
+      <p>The AI synthesizes all data streams into the Predictive Failure Risk Index (PFRI). Every asset receives a real-time risk score: <em>Monitor</em>, <em>Route to next yard</em>, or <em>Stop immediately</em>. The system decides whether to trigger maintenance scheduling, fuel cell switching, or emergency response protocols.</p>
+    </div>
+    <div class="dda-card">
+      <div class="dda-num">03</div>
+      <h3>ACT</h3>
+      <p>Automatically dispatches prioritized alerts to maintenance crews, triggers parts procurement, generates work orders in existing CMMS systems, and — when PFRI reaches critical threshold — activates stabilization mechanisms to slow or halt the train and dispatches emergency engineers en route.</p>
+    </div>
+    <div class="dda-card">
+      <div class="dda-num">04</div>
+      <h3>EXPLAIN</h3>
+      <p>Every decision and alert is logged with full traceability: sensor readings, PFRI scores, recommended and executed actions, and outcomes. The unified dashboard provides regulators, safety managers, and rail operators with a transparent, auditable record of fleet and track health across the entire network.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- EMERGENCY RESPONSE -->
+<section id="emergency">
+  <div class="section-tag">Emergency Response Protocol</div>
+  <h2>WHEN IT <span class="accent">MATTERS</span> MOST</h2>
+  <p style="max-width:600px;color:var(--steel-light);font-size:15px;">If anything goes wrong, RailGuard AI doesn't just alert — it acts. Stabilization mechanisms, emergency dispatch, and full accountability in one coordinated response.</p>
+
+  <div class="emergency-layout fade-in">
+    <div class="emergency-flow">
+      <div class="flow-step">
+        <div class="flow-dot">01</div>
+        <div class="flow-line"></div>
+        <div class="flow-content">
+          <h4>PFRI THRESHOLD BREACH</h4>
+          <p>Sensors detect anomaly — bearing overtemperature, rail stress fracture, or missing fastener. PFRI score crosses critical threshold. Alert generated within 30 seconds.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">02</div>
+        <div class="flow-line"></div>
+        <div class="flow-content">
+          <h4>STABILIZATION ACTIVATED</h4>
+          <p>Stabilization mechanisms engage in conjunction with onboard sensors — slowing or halting the train to prevent derailment while engineers are mobilized. Train does not proceed until clearance confirmed.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">03</div>
+        <div class="flow-line"></div>
+        <div class="flow-content">
+          <h4>EMERGENCY ENGINEERS DISPATCHED</h4>
+          <p>Emergency maintenance engineers are automatically dispatched en route. Precise asset location, defect type, and recommended action transmitted to crew in real time.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">04</div>
+        <div class="flow-line"></div>
+        <div class="flow-content">
+          <h4>DRONE SECONDARY ASSESSMENT</h4>
+          <p>Nearest available drone is rerouted to the incident area for aerial assessment — providing engineers visual confirmation of the threat before they arrive on site.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">05</div>
+        <div class="flow-content">
+          <h4>FULL INCIDENT LOG & CLEARANCE</h4>
+          <p>All actions, sensor readings, and decisions are logged in the unified dashboard. Operations management and regulators receive a complete, auditable incident report. Train cleared for operation upon confirmation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pfri-panel">
+      <div class="pfri-title">// LIVE PFRI MONITOR — ASSET VIEW</div>
+
+      <div class="pfri-bar">
+        <div class="pfri-bar-label">
+          <span>UP-1204 · Union Pacific Corridor</span>
+          <span style="color:var(--green-ok);">MONITOR · 28</span>
+        </div>
+        <div class="pfri-bar-track"><div class="pfri-bar-fill fill-green"></div></div>
+      </div>
+
+      <div class="pfri-bar">
+        <div class="pfri-bar-label">
+          <span>CSX-8872 · Baltimore Subdivision</span>
+          <span style="color:var(--amber);">ROUTE TO YARD · 61</span>
+        </div>
+        <div class="pfri-bar-track"><div class="pfri-bar-fill fill-amber"></div></div>
+      </div>
+
+      <div class="pfri-bar">
+        <div class="pfri-bar-label">
+          <span>NS-3347 · Crescent Corridor</span>
+          <span style="color:var(--red-alert);">STOP IMMEDIATELY · 87</span>
+        </div>
+        <div class="pfri-bar-track"><div class="pfri-bar-fill fill-red"></div></div>
+      </div>
+
+      <div class="alert-box">
+        <div class="alert-dot"></div>
+        <p>CRITICAL ALERT — NS-3347 · Milepost 447.2<br/>
+        Bearing temperature +38°C above threshold<br/>
+        Stabilization engaged · Engineers dispatched · ETA 22 min<br/>
+        Drone assessment en route</p>
+      </div>
+
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--rail-border);">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--steel);letter-spacing:1px;margin-bottom:12px;">PREVENTIVE TRACK HEALTH — WEEKLY DRONE REPORT</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div style="background:var(--rail-black);padding:12px 16px;flex:1;min-width:120px;">
+            <div style="font-family:var(--font-head);font-size:28px;color:var(--green-ok);">847</div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--steel);letter-spacing:1px;">MILES SCANNED</div>
+          </div>
+          <div style="background:var(--rail-black);padding:12px 16px;flex:1;min-width:120px;">
+            <div style="font-family:var(--font-head);font-size:28px;color:var(--amber);">14</div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--steel);letter-spacing:1px;">DEFECTS FLAGGED</div>
+          </div>
+          <div style="background:var(--rail-black);padding:12px 16px;flex:1;min-width:120px;">
+            <div style="font-family:var(--font-head);font-size:28px;color:var(--red-alert);">2</div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--steel);letter-spacing:1px;">CRITICAL ZONES</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NETWORK -->
+<section id="network">
+  <div class="section-tag">Wabtec Rail Network</div>
+  <h2>WHERE <span class="accent">RAILGUARD</span> DEPLOYS</h2>
+  <p style="max-width:640px;color:var(--steel-light);font-size:15px;">RailGuard AI is purpose-built for the Wabtec ecosystem — from the largest U.S. Class I corridors to international heavy-haul and mining railways where infrastructure risk is highest.</p>
+
+  <div class="network-grid fade-in">
+    <div class="network-card">
+      <h3>🇺🇸 U.S. Class I Railroads — Primary Market</h3>
+      <ul class="network-list">
+        <li><span class="flag">▸</span> Union Pacific — $1.2B modernization deal in progress</li>
+        <li><span class="flag">▸</span> CSX — Major eastern freight corridors</li>
+        <li><span class="flag">▸</span> Norfolk Southern — Crescent Corridor + intermodal</li>
+        <li><span class="flag">▸</span> BNSF Railway — Transcon + northern routes</li>
+      </ul>
+      <div class="network-note">→ These four move most of America's freight. RailGuard AI protects every corridor they run.</div>
+    </div>
+    <div class="network-card">
+      <h3>🚛 Short-Line & Regional — Highest Infrastructure Risk</h3>
+      <ul class="network-list">
+        <li><span class="flag">▸</span> Genesee & Wyoming — 100+ railroads, N. America</li>
+        <li><span class="flag">▸</span> Multiple G&W subsidiaries on aging infrastructure</li>
+      </ul>
+      <div class="network-note">→ Short-line railroads are where old infrastructure meets new loads — RailGuard AI's highest-impact deployment zone.</div>
+    </div>
+    <div class="network-card">
+      <h3>⛏️ Mining & Heavy Industry — International</h3>
+      <ul class="network-list">
+        <li><span class="flag">▸</span> Rio Tinto — Battery-electric locomotives, extreme conditions</li>
+        <li><span class="flag">▸</span> BHP — Heavy-haul private network</li>
+        <li><span class="flag">▸</span> Roy Hill — Iron ore heavy-haul Australia</li>
+      </ul>
+      <div class="network-note">→ Private networks, extreme environments, highest derailment consequence. Perfect RailGuard use case.</div>
+    </div>
+    <div class="network-card">
+      <h3>🌍 Global Rail Systems — Expansion Markets</h3>
+      <ul class="network-list">
+        <li><span class="flag">▸</span> Kazakhstan Temir Zholy — Multi-billion dollar locomotive deal</li>
+        <li><span class="flag">▸</span> Indian Railways — Joint manufacturing + mass deployment</li>
+        <li><span class="flag">▸</span> Guinea iron ore railway — African heavy-haul</li>
+        <li><span class="flag">▸</span> MBTA / Metro-North / SunRail — Passenger & commuter</li>
+      </ul>
+      <div class="network-note">→ Governments and national railways: large contracts, global safety mandates, strategic expansion.</div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section id="metrics">
+  <div class="section-tag">Success Metrics</div>
+  <h2>MEASURING <span class="accent">ZERO</span></h2>
+  <p style="max-width:600px;color:var(--steel-light);font-size:15px;">Every metric tied to a measurable, time-bound target. RailGuard AI doesn't move the needle — it moves it to zero.</p>
+
+  <table class="metrics-table fade-in">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Target</th>
+        <th>Timeline</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Reduction in track defect-related In-Service Failures (ISFs)</td>
+        <td><span class="metric-target">15% reduction in pilot year</span></td>
+        <td>Year 1 of full deployment</td>
+      </tr>
+      <tr>
+        <td>Mainline broken rail derailments in RailGuard-protected segments</td>
+        <td><span class="metric-target">ZERO derailments</span></td>
+        <td>Within 2 years of full deployment</td>
+      </tr>
+      <tr>
+        <td>Track-related reactive maintenance budget (OpEx)</td>
+        <td><span class="metric-target">10% annual reduction</span></td>
+        <td>Ongoing — annually measured</td>
+      </tr>
+      <tr>
+        <td>AI defect detection accuracy — critical (P0) / standard (P1)</td>
+        <td><span class="metric-target">95% P0 · 90% P1</span></td>
+        <td>At production deployment</td>
+      </tr>
+      <tr>
+        <td>Maintenance planner / supervisor active user adoption</td>
+        <td><span class="metric-target">80% active engagement</span></td>
+        <td>Within 3 months of pilot rollout</td>
+      </tr>
+      <tr>
+        <td>Time to defect detection vs. manual inspection cycle</td>
+        <td><span class="metric-target">75% faster detection</span></td>
+        <td>Measured at 6-month mark</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      Rail<span>Guard</span> AI
+      <p>An integrated predictive rail intelligence platform built for Wabtec. Protecting every corridor, every asset, every shift.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li>Autonomous Drone Patrol</li>
+        <li>Edge AI Diagnostic Units</li>
+        <li>PFRI Risk Index</li>
+        <li>Unified Cloud Dashboard</li>
+        <li>Emergency Response Protocol</li>
+        <li>CMMS API Integration</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Target Railroads</h4>
+      <ul>
+        <li>Union Pacific</li>
+        <li>CSX · BNSF · NS</li>
+        <li>Genesee & Wyoming</li>
+        <li>Rio Tinto · BHP · Roy Hill</li>
+        <li>Indian Railways</li>
+        <li>MBTA · Metro-North · SunRail</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Pillars</h4>
+      <ul>
+        <li>🛡️ Safe</li>
+        <li>🌱 Sustainable</li>
+        <li>🔐 Secure</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 RailGuard AI — A Wabtec Initiative</span>
+    <span>PRD v2.0 · DETECT · DECIDE · PROTECT</span>
+    <span style="color:var(--amber);">PFRI: ACTIVE</span>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════
+     RAILGUARD OPS CENTER — Full-screen overlay dashboard
+     ═══════════════════════════════════════════════════════════ -->
+<div id="ops-overlay" style="display:none;">
+
+<style>
+/* ── OPS CENTER BASE ── */
+#ops-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--rail-black);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-body);
+}
+
+/* ── OPS TOPBAR ── */
+.ops-topbar {
+  height: 56px;
+  background: var(--rail-panel);
+  border-bottom: 1px solid var(--rail-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 0 0;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.ops-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 56px;
+  padding: 0 20px;
+  border-right: 1px solid var(--rail-border);
+}
+
+.ops-topbar-brand span {
+  font-family: var(--font-head);
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--white);
+}
+
+.ops-topbar-brand span b { color: var(--amber); }
+
+.ops-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ops-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--steel);
+  letter-spacing: 1px;
+}
+
+.ops-live-dot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--green-ok);
+  letter-spacing: 1px;
+}
+
+.ops-live-dot::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green-ok);
+  box-shadow: 0 0 8px var(--green-ok);
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.ops-close-btn {
+  background: none;
+  border: 1px solid var(--rail-border);
+  color: var(--steel);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ops-close-btn:hover { border-color: var(--red-alert); color: var(--red-alert); }
+
+/* ── OPS BODY LAYOUT ── */
+.ops-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.ops-sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: #0d1117;
+  border-right: 1px solid var(--rail-border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease, min-width 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.ops-sidebar.collapsed { width: 56px; min-width: 56px; }
+
+.sidebar-toggle {
+  position: absolute;
+  top: 12px;
+  right: -1px;
+  width: 20px;
+  height: 40px;
+  background: var(--rail-border);
+  border: 1px solid var(--rail-border);
+  border-left: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  color: var(--steel);
+  font-size: 10px;
+  transition: background 0.2s;
+}
+
+.sidebar-toggle:hover { background: var(--amber-glow); color: var(--amber); }
+
+.sidebar-nav {
+  padding: 16px 0;
+  flex: 1;
+}
+
+.sidebar-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--steel);
+  text-transform: uppercase;
+  padding: 8px 16px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.ops-sidebar.collapsed .sidebar-section-label { opacity: 0; }
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  position: relative;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-item:hover { background: rgba(245,166,35,0.06); }
+
+.sidebar-item.active {
+  background: var(--amber-glow);
+  border-left-color: var(--amber);
+}
+
+.sidebar-item.active .si-label { color: var(--amber); }
+
+.si-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.si-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--steel-light);
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.ops-sidebar.collapsed .si-label { opacity: 0; pointer-events: none; }
+
+.si-badge {
+  margin-left: auto;
+  background: var(--red-alert);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  min-width: 18px;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.ops-sidebar.collapsed .si-badge { opacity: 0; }
+
+.si-badge.amber { background: var(--amber-dim); }
+.si-badge.green { background: #1a7a45; }
+
+.sidebar-footer {
+  border-top: 1px solid var(--rail-border);
+  padding: 12px 16px;
+}
+
+.integrity-widget {
+  overflow: hidden;
+}
+
+.integrity-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--steel);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.ops-sidebar.collapsed .integrity-label { opacity: 0; }
+
+.integrity-ring-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.integrity-score-text {
+  font-family: var(--font-head);
+  font-size: 26px;
+  color: var(--amber);
+  line-height: 1;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.ops-sidebar.collapsed .integrity-score-text { opacity: 0; width: 0; overflow: hidden; }
+
+.integrity-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--steel);
+  margin-top: 2px;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.ops-sidebar.collapsed .integrity-sub { opacity: 0; }
+
+/* ── MAIN CONTENT AREA ── */
+.ops-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Scrollbar styling */
+.ops-main::-webkit-scrollbar { width: 4px; }
+.ops-main::-webkit-scrollbar-track { background: var(--rail-black); }
+.ops-main::-webkit-scrollbar-thumb { background: var(--rail-border); }
+
+/* ── VIEW PAGES ── */
+.ops-view { display: none; padding: 24px; animation: fadeSlide 0.2s ease; }
+.ops-view.active { display: block; }
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── PAGE HEADER ── */
+.ops-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ops-page-title {
+  font-family: var(--font-head);
+  font-size: 32px;
+  letter-spacing: 3px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.ops-page-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* ── METRICS CARDS ── */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.metric-card:hover { border-color: rgba(245,166,35,0.4); }
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+}
+
+.mc-open::before { background: var(--amber); }
+.mc-critical::before { background: var(--red-alert); }
+.mc-inprogress::before { background: #3b82f6; }
+.mc-complete::before { background: var(--green-ok); }
+
+.metric-card-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--steel);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.metric-card-value {
+  font-family: var(--font-head);
+  font-size: 44px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.mc-open .metric-card-value { color: var(--amber); }
+.mc-critical .metric-card-value { color: var(--red-alert); }
+.mc-inprogress .metric-card-value { color: #60a5fa; }
+.mc-complete .metric-card-value { color: var(--green-ok); }
+
+.metric-card-delta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel);
+  letter-spacing: 0.5px;
+}
+
+.delta-up { color: var(--red-alert); }
+.delta-down { color: var(--green-ok); }
+
+.metric-sparkline {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 80px; height: 36px;
+  opacity: 0.4;
+}
+
+/* ── INTEGRITY METER SECTION ── */
+.integrity-section {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  padding: 24px;
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 32px;
+  align-items: center;
+}
+
+.integrity-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.integrity-ring-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.integrity-ring-container svg {
+  transform: rotate(-90deg);
+}
+
+.integrity-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.integrity-ring-label .pct {
+  font-family: var(--font-head);
+  font-size: 30px;
+  color: var(--amber);
+  line-height: 1;
+}
+
+.integrity-ring-label .lbl {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--steel);
+  letter-spacing: 1px;
+}
+
+.integrity-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.integrity-status-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  background: rgba(245,166,35,0.15);
+  border: 1px solid rgba(245,166,35,0.4);
+  color: var(--amber);
+}
+
+.integrity-corridors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.corridor-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.corridor-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel-light);
+  width: 200px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.corridor-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--rail-black);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.corridor-bar-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+
+.cf-green { background: var(--green-ok); }
+.cf-amber { background: var(--amber); }
+.cf-red { background: var(--red-alert); }
+
+.corridor-pct {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  width: 36px;
+  text-align: right;
+}
+
+.corridor-status {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  width: 90px;
+  text-align: center;
+}
+
+.cs-ok { background: rgba(46,204,113,0.1); color: var(--green-ok); border: 1px solid rgba(46,204,113,0.3); }
+.cs-warn { background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.3); }
+.cs-critical { background: rgba(224,60,49,0.1); color: var(--red-alert); border: 1px solid rgba(224,60,49,0.3); }
+
+.integrity-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.is-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rail-border);
+}
+
+.is-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.is-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.is-value {
+  font-family: var(--font-head);
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* ── WORK ORDER TABLE ── */
+.wo-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.wo-search {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px 14px;
+  outline: none;
+  flex: 1;
+  min-width: 200px;
+  transition: border-color 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.wo-search::placeholder { color: var(--steel); }
+.wo-search:focus { border-color: var(--amber); }
+
+.wo-filter {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  color: var(--steel-light);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px 12px;
+  outline: none;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.wo-filter:focus { border-color: var(--amber); outline: none; }
+
+.btn-ops {
+  background: var(--amber);
+  color: var(--rail-black);
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.btn-ops:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.btn-ops-outline {
+  background: transparent;
+  color: var(--steel-light);
+  border: 1px solid var(--rail-border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-ops-outline:hover { border-color: var(--amber); color: var(--amber); }
+
+.wo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.wo-table thead tr {
+  background: var(--rail-panel);
+  border-bottom: 2px solid var(--rail-border);
+}
+
+.wo-table th {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--steel);
+  text-transform: uppercase;
+  text-align: left;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.wo-table th:hover { color: var(--amber); }
+
+.wo-table tbody tr {
+  border-bottom: 1px solid var(--rail-border);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.wo-table tbody tr:hover { background: rgba(245,166,35,0.04); }
+
+.wo-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  color: var(--steel-light);
+  font-size: 12px;
+}
+
+.wo-table td:first-child {
+  font-family: var(--font-mono);
+  color: var(--amber);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.wo-table td.td-location {
+  font-size: 11px;
+  color: var(--steel);
+}
+
+/* Priority badges */
+.prio {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.prio-critical { background: rgba(224,60,49,0.15); color: var(--red-alert); border: 1px solid rgba(224,60,49,0.4); }
+.prio-high { background: rgba(245,166,35,0.12); color: var(--amber); border: 1px solid rgba(245,166,35,0.35); }
+.prio-medium { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+.prio-low { background: rgba(46,204,113,0.1); color: var(--green-ok); border: 1px solid rgba(46,204,113,0.25); }
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.sb-open { background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+.sb-inprogress { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
+.sb-review { background: rgba(167,139,250,0.1); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.25); }
+.sb-complete { background: rgba(46,204,113,0.1); color: var(--green-ok); border: 1px solid rgba(46,204,113,0.25); }
+.sb-blocked { background: rgba(224,60,49,0.1); color: var(--red-alert); border: 1px solid rgba(224,60,49,0.25); }
+
+/* ── TASK DETAIL PANEL (slide-out) ── */
+.task-panel-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(2px);
+}
+
+.task-panel-backdrop.open { display: block; }
+
+.task-panel {
+  position: fixed;
+  top: 0; right: -520px;
+  width: 500px;
+  height: 100%;
+  background: #0d1117;
+  border-left: 1px solid var(--rail-border);
+  z-index: 9600;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.16,1,0.3,1);
+  overflow: hidden;
+}
+
+.task-panel.open { right: 0; }
+
+.task-panel-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--rail-border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.task-panel-id {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.task-panel-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.task-panel-close {
+  background: none;
+  border: 1px solid var(--rail-border);
+  color: var(--steel);
+  font-size: 16px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.task-panel-close:hover { border-color: var(--red-alert); color: var(--red-alert); }
+
+.task-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.task-panel-body::-webkit-scrollbar { width: 3px; }
+.task-panel-body::-webkit-scrollbar-thumb { background: var(--rail-border); }
+
+.tp-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--rail-border);
+}
+
+.tp-section:last-child { border-bottom: none; }
+
+.tp-section-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--steel);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.tp-field {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tp-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel);
+  letter-spacing: 0.5px;
+  padding-top: 2px;
+}
+
+.tp-val {
+  font-size: 13px;
+  color: var(--steel-light);
+  line-height: 1.5;
+}
+
+.tp-select {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 7px 10px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.tp-select:focus { border-color: var(--amber); }
+
+.tp-textarea {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 10px 12px;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+}
+
+.tp-textarea:focus { border-color: var(--amber); }
+
+.tp-crew-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tp-crew-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  padding: 8px 12px;
+}
+
+.tp-crew-name {
+  font-size: 12px;
+  color: var(--white);
+}
+
+.tp-crew-role {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--steel);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.tp-crew-remove {
+  background: none;
+  border: none;
+  color: var(--steel);
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 4px;
+}
+
+.tp-crew-remove:hover { color: var(--red-alert); }
+
+.tp-add-crew {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tp-input {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 7px 10px;
+  outline: none;
+  flex: 1;
+  transition: border-color 0.2s;
+}
+
+.tp-input:focus { border-color: var(--amber); }
+
+.task-panel-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--rail-border);
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Timeline */
+.tp-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tp-timeline-item {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.tp-timeline-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 5px; top: 14px; bottom: 0;
+  width: 1px;
+  background: var(--rail-border);
+}
+
+.tp-tl-dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--rail-border);
+  border: 2px solid var(--steel);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.tp-tl-dot.amber { border-color: var(--amber); background: rgba(245,166,35,0.2); }
+.tp-tl-dot.green { border-color: var(--green-ok); background: rgba(46,204,113,0.15); }
+.tp-tl-dot.red { border-color: var(--red-alert); background: rgba(224,60,49,0.15); }
+
+.tp-tl-time {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--steel);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.tp-tl-desc {
+  font-size: 12px;
+  color: var(--steel-light);
+}
+
+/* ── CREATE WORK ORDER DIALOG ── */
+.dialog-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9700;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(3px);
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-backdrop.open { display: flex; }
+
+.dialog-box {
+  background: #0d1117;
+  border: 1px solid var(--rail-border);
+  width: 560px;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: dialogPop 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes dialogPop {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.dialog-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--rail-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.dialog-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--white);
+}
+
+.dialog-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.dialog-body::-webkit-scrollbar { width: 3px; }
+.dialog-body::-webkit-scrollbar-thumb { background: var(--rail-border); }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field.full { grid-column: 1/-1; }
+
+.form-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.form-input, .form-select, .form-textarea {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 9px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--amber); }
+.form-input::placeholder { color: var(--steel); }
+
+.form-textarea {
+  resize: vertical;
+  min-height: 70px;
+  line-height: 1.6;
+}
+
+.form-select { cursor: pointer; }
+
+.dialog-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--rail-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── ALERTS VIEW ── */
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert-item {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  border-left: 3px solid var(--rail-border);
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.alert-item:hover { border-right-color: rgba(245,166,35,0.3); }
+.alert-item.al-critical { border-left-color: var(--red-alert); }
+.alert-item.al-warn { border-left-color: var(--amber); }
+.alert-item.al-info { border-left-color: #60a5fa; }
+
+.alert-icon { font-size: 20px; }
+
+.alert-main-title {
+  font-family: var(--font-head);
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  color: var(--white);
+  margin-bottom: 3px;
+}
+
+.alert-main-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel);
+  letter-spacing: 0.5px;
+}
+
+.alert-meta {
+  text-align: right;
+}
+
+.alert-meta-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel);
+  margin-bottom: 4px;
+}
+
+/* ── ANALYTICS VIEW ── */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.analytics-card {
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  padding: 20px;
+}
+
+.analytics-card-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--steel);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.bar-chart-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bc-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bc-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel-light);
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.bc-track {
+  flex: 1;
+  height: 14px;
+  background: var(--rail-black);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.bc-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 1s ease;
+}
+
+.bc-val {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--steel);
+  width: 30px;
+  text-align: right;
+}
+
+.mini-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mini-stat {
+  background: var(--rail-black);
+  padding: 14px;
+  text-align: center;
+}
+
+.mini-stat-val {
+  font-family: var(--font-head);
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.mini-stat-lbl {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+/* ── TOAST ── */
+.ops-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: var(--rail-panel);
+  border: 1px solid var(--rail-border);
+  border-left: 3px solid var(--green-ok);
+  padding: 14px 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--white);
+  letter-spacing: 0.5px;
+  max-width: 320px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.ops-toast.show { opacity: 1; transform: translateY(0); }
+</style>
+
+<!-- Topbar -->
+<div class="ops-topbar">
+  <div class="ops-topbar-brand">
+    <span>Rail<b>Guard</b> OPS</span>
+    <span class="nav-badge" style="margin-left:12px;">v2.0</span>
+  </div>
+  <div class="ops-topbar-right">
+    <div class="ops-live-dot">LIVE FEED</div>
+    <div class="ops-time" id="ops-clock">--:--:-- UTC</div>
+    <button class="ops-close-btn" onclick="closeOpsCenter()">✕ EXIT OPS</button>
+  </div>
+</div>
+
+<!-- Body -->
+<div class="ops-body">
+
+  <!-- Sidebar -->
+  <div class="ops-sidebar" id="ops-sidebar">
+    <div class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-toggle-btn">›</div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">OPERATIONS</div>
+      <div class="sidebar-item active" onclick="switchView('dashboard', this)">
+        <span class="si-icon">◈</span>
+        <span class="si-label">Dashboard</span>
+      </div>
+      <div class="sidebar-item" onclick="switchView('workorders', this)">
+        <span class="si-icon">☰</span>
+        <span class="si-label">Work Orders</span>
+        <span class="si-badge amber" id="sb-wo-count">24</span>
+      </div>
+      <div class="sidebar-item" onclick="switchView('alerts', this)">
+        <span class="si-icon">⚠</span>
+        <span class="si-label">Alerts</span>
+        <span class="si-badge" id="sb-alert-count">3</span>
+      </div>
+      <div class="sidebar-section-label" style="margin-top:8px;">ANALYTICS</div>
+      <div class="sidebar-item" onclick="switchView('analytics', this)">
+        <span class="si-icon">▣</span>
+        <span class="si-label">Performance</span>
+      </div>
+      <div class="sidebar-item" onclick="switchView('corridors', this)">
+        <span class="si-icon">⇌</span>
+        <span class="si-label">Corridors</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="integrity-widget">
+        <div class="integrity-label">RAIL INTEGRITY</div>
+        <div class="integrity-ring-wrap">
+          <svg width="36" height="36" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="14" fill="none" stroke="#1e2530" stroke-width="3"/>
+            <circle cx="18" cy="18" r="14" fill="none" stroke="#f5a623" stroke-width="3"
+              stroke-dasharray="87.96" stroke-dashoffset="17.59"
+              stroke-linecap="butt"
+              style="transform:rotate(-90deg);transform-origin:50% 50%;"/>
+          </svg>
+          <div>
+            <div class="integrity-score-text">80%</div>
+            <div class="integrity-sub">NOMINAL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="ops-main">
+
+    <!-- ══ DASHBOARD VIEW ══ -->
+    <div class="ops-view active" id="view-dashboard">
+      <div class="ops-page-header">
+        <div>
+          <div class="ops-page-title">OPERATIONS DASHBOARD</div>
+          <div class="ops-page-sub">SHIFT: BRAVO · CORRIDOR: NATIONAL NETWORK · <span id="dash-date">--</span></div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-ops-outline" onclick="openCreateDialog()">+ NEW WORK ORDER</button>
+          <button class="btn-ops" onclick="showToast('Report exported to PDF')">⬇ EXPORT REPORT</button>
+        </div>
+      </div>
+
+      <!-- Metric Cards -->
+      <div class="metrics-row">
+        <div class="metric-card mc-open">
+          <div class="metric-card-label">Open Orders</div>
+          <div class="metric-card-value" id="mc-open">24</div>
+          <div class="metric-card-delta"><span class="delta-up">↑ 3</span> from yesterday</div>
+          <svg class="metric-sparkline" viewBox="0 0 80 36">
+            <polyline points="0,28 13,22 26,25 39,18 52,20 65,12 80,16" fill="none" stroke="#f5a623" stroke-width="1.5" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="metric-card mc-critical">
+          <div class="metric-card-label">Critical Alerts</div>
+          <div class="metric-card-value" id="mc-critical">3</div>
+          <div class="metric-card-delta"><span class="delta-up">↑ 1</span> last 6 hours</div>
+          <svg class="metric-sparkline" viewBox="0 0 80 36">
+            <polyline points="0,30 13,28 26,30 39,20 52,24 65,10 80,14" fill="none" stroke="#e03c31" stroke-width="1.5" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="metric-card mc-inprogress">
+          <div class="metric-card-label">In Progress</div>
+          <div class="metric-card-value" id="mc-inprog">11</div>
+          <div class="metric-card-delta"><span class="delta-down">↓ 2</span> vs. avg</div>
+          <svg class="metric-sparkline" viewBox="0 0 80 36">
+            <polyline points="0,20 13,14 26,18 39,10 52,12 65,16 80,8" fill="none" stroke="#60a5fa" stroke-width="1.5" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="metric-card mc-complete">
+          <div class="metric-card-label">Completion Rate</div>
+          <div class="metric-card-value" id="mc-rate">87%</div>
+          <div class="metric-card-delta"><span class="delta-down">↑ 4%</span> this week</div>
+          <svg class="metric-sparkline" viewBox="0 0 80 36">
+            <polyline points="0,30 13,26 26,22 39,20 52,16 65,14 80,10" fill="none" stroke="#2ecc71" stroke-width="1.5" opacity="0.7"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Integrity Section -->
+      <div class="integrity-section">
+        <div class="integrity-main">
+          <div class="integrity-title">OVERALL INTEGRITY</div>
+          <div class="integrity-ring-container">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#1e2530" stroke-width="8"/>
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#1e2530" stroke-width="8" stroke-dasharray="326.7" stroke-dashoffset="0"/>
+              <!-- Zones: green 0-65, amber 65-80, red 80-100 -->
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#2ecc71" stroke-width="8"
+                stroke-dasharray="212.4 114.3" stroke-dashoffset="0" opacity="0.25"/>
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#f5a623" stroke-width="8"
+                stroke-dasharray="49.0 277.7" stroke-dashoffset="-212.4" opacity="0.25"/>
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#e03c31" stroke-width="8"
+                stroke-dasharray="65.3 261.4" stroke-dashoffset="-261.4" opacity="0.25"/>
+              <!-- Progress arc: 80% = 261.36 of 326.73 -->
+              <circle id="integrity-arc" cx="60" cy="60" r="52" fill="none" stroke="#f5a623" stroke-width="8"
+                stroke-dasharray="261 327" stroke-dashoffset="0" stroke-linecap="butt"
+                style="transition: stroke-dasharray 1.5s cubic-bezier(0.16,1,0.3,1)"/>
+            </svg>
+            <div class="integrity-ring-label">
+              <span class="pct" id="integrity-pct">80%</span>
+              <span class="lbl">INTEGRITY</span>
+            </div>
+          </div>
+          <div class="integrity-status-tag" id="integrity-status-tag">● NOMINAL</div>
+        </div>
+
+        <div class="integrity-corridors" id="integrity-corridors">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--steel);margin-bottom:8px;">CORRIDOR BREAKDOWN</div>
+          <div class="corridor-row">
+            <span class="corridor-name">UP-1204 · Union Pacific</span>
+            <div class="corridor-bar-track"><div class="corridor-bar-fill cf-green" style="width:0%" data-w="91%"></div></div>
+            <span class="corridor-pct" style="color:var(--green-ok)">91%</span>
+            <span class="corridor-status cs-ok">CLEAR</span>
+          </div>
+          <div class="corridor-row">
+            <span class="corridor-name">CSX-8872 · Baltimore Sub.</span>
+            <div class="corridor-bar-track"><div class="corridor-bar-fill cf-amber" style="width:0%" data-w="76%"></div></div>
+            <span class="corridor-pct" style="color:var(--amber)">76%</span>
+            <span class="corridor-status cs-warn">MONITOR</span>
+          </div>
+          <div class="corridor-row">
+            <span class="corridor-name">NS-3347 · Crescent Corridor</span>
+            <div class="corridor-bar-track"><div class="corridor-bar-fill cf-red" style="width:0%" data-w="44%"></div></div>
+            <span class="corridor-pct" style="color:var(--red-alert)">44%</span>
+            <span class="corridor-status cs-critical">CRITICAL</span>
+          </div>
+          <div class="corridor-row">
+            <span class="corridor-name">BNSF-441 · Transcon Route</span>
+            <div class="corridor-bar-track"><div class="corridor-bar-fill cf-green" style="width:0%" data-w="88%"></div></div>
+            <span class="corridor-pct" style="color:var(--green-ok)">88%</span>
+            <span class="corridor-status cs-ok">CLEAR</span>
+          </div>
+          <div class="corridor-row">
+            <span class="corridor-name">GW-109 · G&W Subsidiary</span>
+            <div class="corridor-bar-track"><div class="corridor-bar-fill cf-amber" style="width:0%" data-w="63%"></div></div>
+            <span class="corridor-pct" style="color:var(--amber)">63%</span>
+            <span class="corridor-status cs-warn">REVIEW</span>
+          </div>
+        </div>
+
+        <div class="integrity-summary">
+          <div class="is-item">
+            <div class="is-label">Miles Monitored</div>
+            <div class="is-value" style="color:var(--white)">4,821</div>
+          </div>
+          <div class="is-item">
+            <div class="is-label">Defects Flagged</div>
+            <div class="is-value" style="color:var(--amber)">14</div>
+          </div>
+          <div class="is-item">
+            <div class="is-label">Critical Zones</div>
+            <div class="is-value" style="color:var(--red-alert)">2</div>
+          </div>
+          <div class="is-item">
+            <div class="is-label">Last Drone Sweep</div>
+            <div class="is-value" style="color:var(--steel-light);font-size:15px;font-family:var(--font-mono)">14m ago</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Critical Work Orders -->
+      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--steel);margin-bottom:10px;">CRITICAL WORK ORDERS — LIVE</div>
+      <table class="wo-table" style="margin-bottom:24px;">
+        <thead>
+          <tr>
+            <th>ORDER ID</th>
+            <th>DEFECT TYPE</th>
+            <th>LOCATION</th>
+            <th>PRIORITY</th>
+            <th>STATUS</th>
+            <th>CREW</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="openTaskPanel(0)">
+            <td>WO-2024-0091</td>
+            <td>Broken Rail</td>
+            <td class="td-location">NS-3347 · MP 447.2</td>
+            <td><span class="prio prio-critical">CRITICAL</span></td>
+            <td><span class="status-badge sb-inprogress">IN PROGRESS</span></td>
+            <td>Crew Delta-4</td>
+          </tr>
+          <tr onclick="openTaskPanel(1)">
+            <td>WO-2024-0089</td>
+            <td>Bearing Overheat</td>
+            <td class="td-location">CSX-8872 · MP 221.0</td>
+            <td><span class="prio prio-critical">CRITICAL</span></td>
+            <td><span class="status-badge sb-open">OPEN</span></td>
+            <td>Unassigned</td>
+          </tr>
+          <tr onclick="openTaskPanel(2)">
+            <td>WO-2024-0087</td>
+            <td>Gauge Anomaly</td>
+            <td class="td-location">GW-109 · MP 88.4</td>
+            <td><span class="prio prio-high">HIGH</span></td>
+            <td><span class="status-badge sb-review">REVIEW</span></td>
+            <td>Crew Bravo-2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ WORK ORDERS VIEW ══ -->
+    <div class="ops-view" id="view-workorders">
+      <div class="ops-page-header">
+        <div>
+          <div class="ops-page-title">WORK ORDERS</div>
+          <div class="ops-page-sub" id="wo-count-label">24 TOTAL · 3 CRITICAL · 11 IN PROGRESS</div>
+        </div>
+        <button class="btn-ops" onclick="openCreateDialog()">+ CREATE ORDER</button>
+      </div>
+
+      <div class="wo-controls">
+        <input type="text" class="wo-search" id="wo-search" placeholder="SEARCH ORDER ID, DEFECT, LOCATION..." oninput="filterWorkOrders()"/>
+        <select class="wo-filter" id="wo-status-filter" onchange="filterWorkOrders()">
+          <option value="">ALL STATUS</option>
+          <option>OPEN</option>
+          <option>IN PROGRESS</option>
+          <option>REVIEW</option>
+          <option>COMPLETE</option>
+          <option>BLOCKED</option>
+        </select>
+        <select class="wo-filter" id="wo-priority-filter" onchange="filterWorkOrders()">
+          <option value="">ALL PRIORITY</option>
+          <option>CRITICAL</option>
+          <option>HIGH</option>
+          <option>MEDIUM</option>
+          <option>LOW</option>
+        </select>
+        <button class="btn-ops-outline" onclick="clearWOFilters()">CLEAR</button>
+      </div>
+
+      <table class="wo-table" id="wo-full-table">
+        <thead>
+          <tr>
+            <th onclick="sortWO('id')">ORDER ID ⇅</th>
+            <th onclick="sortWO('defect')">DEFECT TYPE ⇅</th>
+            <th>LOCATION</th>
+            <th onclick="sortWO('priority')">PRIORITY ⇅</th>
+            <th onclick="sortWO('status')">STATUS ⇅</th>
+            <th>ASSIGNED CREW</th>
+            <th>CREATED</th>
+          </tr>
+        </thead>
+        <tbody id="wo-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- ══ ALERTS VIEW ══ -->
+    <div class="ops-view" id="view-alerts">
+      <div class="ops-page-header">
+        <div>
+          <div class="ops-page-title">ACTIVE ALERTS</div>
+          <div class="ops-page-sub">3 UNRESOLVED · LAST UPDATE 2 MIN AGO</div>
+        </div>
+        <button class="btn-ops-outline" onclick="showToast('All alerts acknowledged')">ACKNOWLEDGE ALL</button>
+      </div>
+      <div class="alert-list">
+        <div class="alert-item al-critical" onclick="openTaskPanel(0)">
+          <span class="alert-icon">🔴</span>
+          <div>
+            <div class="alert-main-title">BROKEN RAIL DETECTED — NS-3347</div>
+            <div class="alert-main-sub">MP 447.2 · Crescent Corridor · Bearing temp +38°C above threshold · Crew Delta-4 dispatched · ETA 22 min</div>
+          </div>
+          <div class="alert-meta">
+            <div class="alert-meta-time">08:41 UTC</div>
+            <span class="prio prio-critical">CRITICAL</span>
+          </div>
+        </div>
+        <div class="alert-item al-critical" onclick="openTaskPanel(1)">
+          <span class="alert-icon">🔴</span>
+          <div>
+            <div class="alert-main-title">BEARING OVERHEAT — CSX-8872</div>
+            <div class="alert-main-sub">MP 221.0 · Baltimore Subdivision · No crew assigned · Immediate response required</div>
+          </div>
+          <div class="alert-meta">
+            <div class="alert-meta-time">09:04 UTC</div>
+            <span class="prio prio-critical">CRITICAL</span>
+          </div>
+        </div>
+        <div class="alert-item al-warn" onclick="openTaskPanel(2)">
+          <span class="alert-icon">🟡</span>
+          <div>
+            <div class="alert-main-title">GAUGE ANOMALY — GW-109</div>
+            <div class="alert-main-sub">MP 88.4 · G&W Subsidiary · Deviation 4.2mm from spec · Crew Bravo-2 reviewing</div>
+          </div>
+          <div class="alert-meta">
+            <div class="alert-meta-time">07:55 UTC</div>
+            <span class="prio prio-high">HIGH</span>
+          </div>
+        </div>
+        <div class="alert-item al-info">
+          <span class="alert-icon">🔵</span>
+          <div>
+            <div class="alert-main-title">DRONE SWEEP COMPLETE — UP-1204</div>
+            <div class="alert-main-sub">847 miles scanned · 2 minor defects logged · Sector A–F all nominal</div>
+          </div>
+          <div class="alert-meta">
+            <div class="alert-meta-time">06:30 UTC</div>
+            <span class="prio prio-low">INFO</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS VIEW ══ -->
+    <div class="ops-view" id="view-analytics">
+      <div class="ops-page-header">
+        <div>
+          <div class="ops-page-title">PERFORMANCE ANALYTICS</div>
+          <div class="ops-page-sub">ROLLING 30-DAY WINDOW · UPDATED HOURLY</div>
+        </div>
+      </div>
+      <div class="metrics-row" style="margin-bottom:16px;">
+        <div class="metric-card mc-complete">
+          <div class="metric-card-label">Detection Rate</div>
+          <div class="metric-card-value" style="font-size:36px;">95.2%</div>
+          <div class="metric-card-delta">P0 defect accuracy</div>
+        </div>
+        <div class="metric-card mc-inprogress">
+          <div class="metric-card-label">Avg Response Time</div>
+          <div class="metric-card-value" style="font-size:36px;">18m</div>
+          <div class="metric-card-delta"><span class="delta-down">↓ 6m</span> vs. last month</div>
+        </div>
+        <div class="metric-card mc-open">
+          <div class="metric-card-label">Preventive Actions</div>
+          <div class="metric-card-value" style="font-size:36px;">142</div>
+          <div class="metric-card-delta">this month</div>
+        </div>
+        <div class="metric-card mc-complete">
+          <div class="metric-card-label">ISF Reduction</div>
+          <div class="metric-card-value" style="font-size:36px;">−17%</div>
+          <div class="metric-card-delta">vs. baseline year</div>
+        </div>
+      </div>
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="analytics-card-title">DEFECT TYPES — THIS MONTH</div>
+          <div class="bar-chart-row">
+            <div class="bc-row"><span class="bc-label">Broken Rail</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--red-alert)" data-w="72%"></div></div><span class="bc-val">18</span></div>
+            <div class="bc-row"><span class="bc-label">Bearing Overheat</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--amber)" data-w="56%"></div></div><span class="bc-val">14</span></div>
+            <div class="bc-row"><span class="bc-label">Gauge Anomaly</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:#60a5fa" data-w="40%"></div></div><span class="bc-val">10</span></div>
+            <div class="bc-row"><span class="bc-label">Fastener Failure</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:#a78bfa" data-w="28%"></div></div><span class="bc-val">7</span></div>
+            <div class="bc-row"><span class="bc-label">Surface Defect</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--green-ok)" data-w="20%"></div></div><span class="bc-val">5</span></div>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">WORK ORDER STATUS BREAKDOWN</div>
+          <div class="mini-stat-grid">
+            <div class="mini-stat">
+              <div class="mini-stat-val" style="color:var(--amber)">24</div>
+              <div class="mini-stat-lbl">Open</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-val" style="color:#60a5fa">11</div>
+              <div class="mini-stat-lbl">In Progress</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-val" style="color:#c4b5fd">5</div>
+              <div class="mini-stat-lbl">In Review</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-val" style="color:var(--green-ok)">89</div>
+              <div class="mini-stat-lbl">Complete</div>
+            </div>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">CREW PERFORMANCE — COMPLETIONS</div>
+          <div class="bar-chart-row">
+            <div class="bc-row"><span class="bc-label">Crew Alpha-1</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--green-ok)" data-w="88%"></div></div><span class="bc-val">22</span></div>
+            <div class="bc-row"><span class="bc-label">Crew Bravo-2</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--green-ok)" data-w="80%"></div></div><span class="bc-val">20</span></div>
+            <div class="bc-row"><span class="bc-label">Crew Charlie-3</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--amber)" data-w="64%"></div></div><span class="bc-val">16</span></div>
+            <div class="bc-row"><span class="bc-label">Crew Delta-4</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--amber)" data-w="52%"></div></div><span class="bc-val">13</span></div>
+            <div class="bc-row"><span class="bc-label">Crew Echo-5</span><div class="bc-track"><div class="bc-fill" style="width:0%;background:var(--red-alert)" data-w="36%"></div></div><span class="bc-val">9</span></div>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">PFRI SCORE TREND — 7 DAYS</div>
+          <svg viewBox="0 0 300 120" width="100%" style="display:block;">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f5a623" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#f5a623" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Grid lines -->
+            <line x1="0" y1="24" x2="300" y2="24" stroke="#1e2530" stroke-width="1"/>
+            <line x1="0" y1="60" x2="300" y2="60" stroke="#1e2530" stroke-width="1"/>
+            <line x1="0" y1="96" x2="300" y2="96" stroke="#1e2530" stroke-width="1"/>
+            <text x="304" y="27" fill="#8896a5" font-family="JetBrains Mono" font-size="8">75</text>
+            <text x="304" y="63" fill="#8896a5" font-family="JetBrains Mono" font-size="8">50</text>
+            <text x="304" y="99" fill="#8896a5" font-family="JetBrains Mono" font-size="8">25</text>
+            <!-- Area -->
+            <polygon points="0,72 50,60 100,66 150,48 200,36 250,30 300,24 300,96 250,96 200,96 150,96 100,96 50,96 0,96"
+              fill="url(#areaGrad)"/>
+            <!-- Line -->
+            <polyline points="0,72 50,60 100,66 150,48 200,36 250,30 300,24"
+              fill="none" stroke="#f5a623" stroke-width="2" stroke-linejoin="round"/>
+            <!-- Points -->
+            <circle cx="0" cy="72" r="3" fill="#f5a623"/>
+            <circle cx="50" cy="60" r="3" fill="#f5a623"/>
+            <circle cx="100" cy="66" r="3" fill="#f5a623"/>
+            <circle cx="150" cy="48" r="3" fill="#f5a623"/>
+            <circle cx="200" cy="36" r="3" fill="#f5a623"/>
+            <circle cx="250" cy="30" r="3" fill="#f5a623"/>
+            <circle cx="300" cy="24" r="3" fill="#f5a623"/>
+          </svg>
+          <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:8px;color:var(--steel);margin-top:4px;letter-spacing:0.5px;">
+            <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CORRIDORS VIEW ══ -->
+    <div class="ops-view" id="view-corridors">
+      <div class="ops-page-header">
+        <div>
+          <div class="ops-page-title">CORRIDOR STATUS</div>
+          <div class="ops-page-sub">5 ACTIVE CORRIDORS · LAST SWEEP 14 MIN AGO</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="metric-card" style="border-left:3px solid var(--green-ok);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div>
+              <div class="metric-card-label">UP-1204 · UNION PACIFIC — MAIN TRANSCON</div>
+              <div style="font-family:var(--font-head);font-size:26px;color:var(--green-ok);">91% INTEGRITY</div>
+            </div>
+            <span class="corridor-status cs-ok" style="padding:6px 14px;font-size:10px;">CLEAR</span>
+          </div>
+          <div class="corridor-bar-track" style="height:8px;"><div class="corridor-bar-fill cf-green" style="width:91%"></div></div>
+          <div style="display:flex;gap:20px;margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--steel);">
+            <span>MILES: 1,204</span><span>OPEN ORDERS: 4</span><span>LAST SCAN: 8 min</span><span>DEFECTS: 1</span>
+          </div>
+        </div>
+        <div class="metric-card" style="border-left:3px solid var(--green-ok);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div>
+              <div class="metric-card-label">BNSF-441 · BNSF — NORTHERN TRANSCON</div>
+              <div style="font-family:var(--font-head);font-size:26px;color:var(--green-ok);">88% INTEGRITY</div>
+            </div>
+            <span class="corridor-status cs-ok" style="padding:6px 14px;font-size:10px;">CLEAR</span>
+          </div>
+          <div class="corridor-bar-track" style="height:8px;"><div class="corridor-bar-fill cf-green" style="width:88%"></div></div>
+          <div style="display:flex;gap:20px;margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--steel);">
+            <span>MILES: 1,580</span><span>OPEN ORDERS: 3</span><span>LAST SCAN: 14 min</span><span>DEFECTS: 2</span>
+          </div>
+        </div>
+        <div class="metric-card" style="border-left:3px solid var(--amber);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div>
+              <div class="metric-card-label">CSX-8872 · CSX — BALTIMORE SUBDIVISION</div>
+              <div style="font-family:var(--font-head);font-size:26px;color:var(--amber);">76% INTEGRITY</div>
+            </div>
+            <span class="corridor-status cs-warn" style="padding:6px 14px;font-size:10px;">MONITOR</span>
+          </div>
+          <div class="corridor-bar-track" style="height:8px;"><div class="corridor-bar-fill cf-amber" style="width:76%"></div></div>
+          <div style="display:flex;gap:20px;margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--steel);">
+            <span>MILES: 640</span><span>OPEN ORDERS: 8</span><span>LAST SCAN: 3 min</span><span>DEFECTS: 4</span>
+          </div>
+        </div>
+        <div class="metric-card" style="border-left:3px solid var(--amber);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div>
+              <div class="metric-card-label">GW-109 · G&W — SHORT LINE SUBSIDIARY</div>
+              <div style="font-family:var(--font-head);font-size:26px;color:var(--amber);">63% INTEGRITY</div>
+            </div>
+            <span class="corridor-status cs-warn" style="padding:6px 14px;font-size:10px;">REVIEW</span>
+          </div>
+          <div class="corridor-bar-track" style="height:8px;"><div class="corridor-bar-fill cf-amber" style="width:63%"></div></div>
+          <div style="display:flex;gap:20px;margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--steel);">
+            <span>MILES: 218</span><span>OPEN ORDERS: 6</span><span>LAST SCAN: 22 min</span><span>DEFECTS: 5</span>
+          </div>
+        </div>
+        <div class="metric-card" style="border-left:3px solid var(--red-alert);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div>
+              <div class="metric-card-label">NS-3347 · NORFOLK SOUTHERN — CRESCENT CORRIDOR</div>
+              <div style="font-family:var(--font-head);font-size:26px;color:var(--red-alert);">44% INTEGRITY</div>
+            </div>
+            <span class="corridor-status cs-critical" style="padding:6px 14px;font-size:10px;">CRITICAL</span>
+          </div>
+          <div class="corridor-bar-track" style="height:8px;"><div class="corridor-bar-fill cf-red" style="width:44%"></div></div>
+          <div style="display:flex;gap:20px;margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--steel);">
+            <span>MILES: 1,179</span><span>OPEN ORDERS: 3</span><span>LAST SCAN: 1 min</span><span>DEFECTS: 7 ⚠</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ops-main -->
+</div><!-- /ops-body -->
+
+</div><!-- /ops-overlay -->
+
+<!-- ══ TASK DETAIL PANEL ══ -->
+<div class="task-panel-backdrop" id="task-backdrop" onclick="closeTaskPanel()"></div>
+<div class="task-panel" id="task-panel">
+  <div class="task-panel-header">
+    <div>
+      <div class="task-panel-id" id="tp-id">WO-2024-0091</div>
+      <div class="task-panel-title" id="tp-title">BROKEN RAIL REPAIR</div>
+    </div>
+    <button class="task-panel-close" onclick="closeTaskPanel()">✕</button>
+  </div>
+  <div class="task-panel-body">
+    <div class="tp-section">
+      <div class="tp-section-title">ORDER DETAILS</div>
+      <div class="tp-field"><span class="tp-key">Location</span><span class="tp-val" id="tp-location">NS-3347 · Milepost 447.2 · Crescent Corridor</span></div>
+      <div class="tp-field"><span class="tp-key">Defect Type</span><span class="tp-val" id="tp-defect">Broken Rail — Surface fatigue fracture</span></div>
+      <div class="tp-field"><span class="tp-key">Priority</span><span class="tp-val" id="tp-prio-cell"><span class="prio prio-critical">CRITICAL</span></span></div>
+      <div class="tp-field"><span class="tp-key">Created</span><span class="tp-val" id="tp-created">2026-03-20 · 08:41 UTC</span></div>
+      <div class="tp-field"><span class="tp-key">Reported By</span><span class="tp-val" id="tp-reporter">Drone Unit DR-07 (AI Detection)</span></div>
+    </div>
+
+    <div class="tp-section">
+      <div class="tp-section-title">CHANGE STATUS</div>
+      <div class="tp-field" style="display:block;">
+        <div class="tp-key" style="margin-bottom:6px;">Current Status</div>
+        <select class="tp-select" id="tp-status-select" onchange="updateTaskStatus()">
+          <option value="open">OPEN</option>
+          <option value="inprogress" selected>IN PROGRESS</option>
+          <option value="review">IN REVIEW</option>
+          <option value="complete">COMPLETE</option>
+          <option value="blocked">BLOCKED</option>
+        </select>
+      </div>
+      <div class="tp-field" style="display:block;margin-top:12px;">
+        <div class="tp-key" style="margin-bottom:6px;">Status Notes</div>
+        <textarea class="tp-textarea" placeholder="Add status update or notes..."></textarea>
+      </div>
+    </div>
+
+    <div class="tp-section">
+      <div class="tp-section-title">ASSIGNED CREW</div>
+      <div class="tp-crew-list" id="tp-crew-list">
+        <div class="tp-crew-item">
+          <div><div class="tp-crew-name">Marcus Webb</div><div class="tp-crew-role">LEAD ENGINEER</div></div>
+          <button class="tp-crew-remove" onclick="removeCrewFromPanel(this)">×</button>
+        </div>
+        <div class="tp-crew-item">
+          <div><div class="tp-crew-name">Jenna Kowalski</div><div class="tp-crew-role">TRACK SPECIALIST</div></div>
+          <button class="tp-crew-remove" onclick="removeCrewFromPanel(this)">×</button>
+        </div>
+        <div class="tp-crew-item">
+          <div><div class="tp-crew-name">Ray Okafor</div><div class="tp-crew-role">SAFETY OFFICER</div></div>
+          <button class="tp-crew-remove" onclick="removeCrewFromPanel(this)">×</button>
+        </div>
+      </div>
+      <div class="tp-add-crew">
+        <select class="tp-select" id="tp-crew-select" style="flex:1;">
+          <option value="">ADD CREW MEMBER...</option>
+          <option>Torres, Miguel — Lead Engineer</option>
+          <option>Park, Soo-Yeon — Track Specialist</option>
+          <option>Okonkwo, Emeka — Safety Officer</option>
+          <option>Hansen, Lars — Equipment Op.</option>
+          <option>Diaz, Carla — Survey Technician</option>
+        </select>
+        <button class="btn-ops" onclick="addCrewFromPanel()">ADD</button>
+      </div>
+    </div>
+
+    <div class="tp-section">
+      <div class="tp-section-title">ACTIVITY LOG</div>
+      <div class="tp-timeline">
+        <div class="tp-timeline-item">
+          <div class="tp-tl-dot red"></div>
+          <div>
+            <div class="tp-tl-time">08:41 UTC · Drone DR-07</div>
+            <div class="tp-tl-desc">Critical defect detected — surface fatigue fracture at MP 447.2</div>
+          </div>
+        </div>
+        <div class="tp-timeline-item">
+          <div class="tp-tl-dot amber"></div>
+          <div>
+            <div class="tp-tl-time">08:43 UTC · System</div>
+            <div class="tp-tl-desc">Work order WO-2024-0091 created. Crew Delta-4 auto-assigned.</div>
+          </div>
+        </div>
+        <div class="tp-timeline-item">
+          <div class="tp-tl-dot amber"></div>
+          <div>
+            <div class="tp-tl-time">08:50 UTC · M. Webb</div>
+            <div class="tp-tl-desc">Team acknowledged. En route to MP 447.2. ETA 22 min.</div>
+          </div>
+        </div>
+        <div class="tp-timeline-item">
+          <div class="tp-tl-dot"></div>
+          <div>
+            <div class="tp-tl-time">Now · Awaiting</div>
+            <div class="tp-tl-desc">On-site assessment pending crew arrival</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="task-panel-footer">
+    <button class="btn-ops" onclick="saveTaskPanel()" style="flex:1;">SAVE CHANGES</button>
+    <button class="btn-ops-outline" onclick="showToast('Escalation sent to Ops Manager')">ESCALATE</button>
+  </div>
+</div>
+
+<!-- ══ CREATE WORK ORDER DIALOG ══ -->
+<div class="dialog-backdrop" id="create-dialog">
+  <div class="dialog-box">
+    <div class="dialog-header">
+      <span class="dialog-title">CREATE WORK ORDER</span>
+      <button class="task-panel-close" onclick="closeCreateDialog()">✕</button>
+    </div>
+    <div class="dialog-body">
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-label">Priority Level</label>
+          <select class="form-select" id="cf-priority">
+            <option>CRITICAL</option>
+            <option>HIGH</option>
+            <option selected>MEDIUM</option>
+            <option>LOW</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Defect Type</label>
+          <select class="form-select" id="cf-defect">
+            <option>Broken Rail</option>
+            <option>Bearing Overheat</option>
+            <option>Gauge Anomaly</option>
+            <option>Fastener Failure</option>
+            <option>Surface Defect</option>
+            <option>Alignment Issue</option>
+            <option>Joint Deterioration</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-label">Corridor</label>
+          <select class="form-select" id="cf-corridor">
+            <option>UP-1204 · Union Pacific</option>
+            <option>CSX-8872 · Baltimore Sub.</option>
+            <option>NS-3347 · Crescent Corridor</option>
+            <option>BNSF-441 · Northern Transcon</option>
+            <option>GW-109 · G&W Subsidiary</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Milepost</label>
+          <input type="text" class="form-input" id="cf-milepost" placeholder="e.g. MP 224.7"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field full">
+          <label class="form-label">Assigned Crew</label>
+          <select class="form-select" id="cf-crew">
+            <option value="">— UNASSIGNED —</option>
+            <option>Crew Alpha-1</option>
+            <option>Crew Bravo-2</option>
+            <option>Crew Charlie-3</option>
+            <option>Crew Delta-4</option>
+            <option>Crew Echo-5</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field full">
+          <label class="form-label">Description / Notes</label>
+          <textarea class="form-textarea" id="cf-notes" placeholder="Describe the defect, observations, or special instructions..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn-ops-outline" onclick="closeCreateDialog()">CANCEL</button>
+      <button class="btn-ops" onclick="submitCreateOrder()">CREATE ORDER</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="ops-toast" id="ops-toast"></div>
+
+<script>
+  // ── WORK ORDER DATA ──
+  const workOrders = [
+    { id:'WO-2024-0091', defect:'Broken Rail', location:'NS-3347 · MP 447.2', corridor:'NS', priority:'CRITICAL', status:'IN PROGRESS', crew:'Crew Delta-4', created:'03/20 08:41' },
+    { id:'WO-2024-0089', defect:'Bearing Overheat', location:'CSX-8872 · MP 221.0', corridor:'CSX', priority:'CRITICAL', status:'OPEN', crew:'Unassigned', created:'03/20 09:04' },
+    { id:'WO-2024-0087', defect:'Gauge Anomaly', location:'GW-109 · MP 88.4', corridor:'GW', priority:'HIGH', status:'REVIEW', crew:'Crew Bravo-2', created:'03/20 07:55' },
+    { id:'WO-2024-0085', defect:'Fastener Failure', location:'UP-1204 · MP 312.1', corridor:'UP', priority:'HIGH', status:'IN PROGRESS', crew:'Crew Alpha-1', created:'03/19 14:22' },
+    { id:'WO-2024-0083', defect:'Surface Defect', location:'BNSF-441 · MP 890.5', corridor:'BNSF', priority:'MEDIUM', status:'OPEN', crew:'Crew Charlie-3', created:'03/19 11:10' },
+    { id:'WO-2024-0081', defect:'Alignment Issue', location:'CSX-8872 · MP 198.7', corridor:'CSX', priority:'MEDIUM', status:'OPEN', crew:'Unassigned', created:'03/19 09:30' },
+    { id:'WO-2024-0079', defect:'Joint Deterioration', location:'NS-3347 · MP 502.3', corridor:'NS', priority:'HIGH', status:'IN PROGRESS', crew:'Crew Delta-4', created:'03/18 16:45' },
+    { id:'WO-2024-0077', defect:'Bearing Overheat', location:'UP-1204 · MP 105.9', corridor:'UP', priority:'MEDIUM', status:'COMPLETE', crew:'Crew Alpha-1', created:'03/18 08:00' },
+    { id:'WO-2024-0075', defect:'Surface Defect', location:'GW-109 · MP 44.2', corridor:'GW', priority:'LOW', status:'COMPLETE', crew:'Crew Echo-5', created:'03/17 14:15' },
+    { id:'WO-2024-0073', defect:'Fastener Failure', location:'BNSF-441 · MP 1102.8', corridor:'BNSF', priority:'MEDIUM', status:'REVIEW', crew:'Crew Charlie-3', created:'03/17 10:05' },
+    { id:'WO-2024-0071', defect:'Broken Rail', location:'CSX-8872 · MP 310.4', corridor:'CSX', priority:'CRITICAL', status:'COMPLETE', crew:'Crew Bravo-2', created:'03/16 22:10' },
+    { id:'WO-2024-0069', defect:'Gauge Anomaly', location:'UP-1204 · MP 788.0', corridor:'UP', priority:'HIGH', status:'OPEN', crew:'Crew Alpha-1', created:'03/16 09:30' },
+    { id:'WO-2024-0067', defect:'Surface Defect', location:'NS-3347 · MP 215.6', corridor:'NS', priority:'LOW', status:'OPEN', crew:'Unassigned', created:'03/15 13:00' },
+    { id:'WO-2024-0065', defect:'Alignment Issue', location:'GW-109 · MP 72.1', corridor:'GW', priority:'MEDIUM', status:'IN PROGRESS', crew:'Crew Echo-5', created:'03/15 08:20' },
+    { id:'WO-2024-0063', defect:'Bearing Overheat', location:'BNSF-441 · MP 340.7', corridor:'BNSF', priority:'HIGH', status:'BLOCKED', crew:'Crew Charlie-3', created:'03/14 17:45' },
+  ];
+
+  const taskPanelData = [
+    { id:'WO-2024-0091', title:'BROKEN RAIL REPAIR', location:'NS-3347 · Milepost 447.2 · Crescent Corridor', defect:'Broken Rail — Surface fatigue fracture', created:'2026-03-20 · 08:41 UTC', reporter:'Drone Unit DR-07 (AI Detection)', status:'inprogress' },
+    { id:'WO-2024-0089', title:'BEARING OVERHEAT RESPONSE', location:'CSX-8872 · Milepost 221.0 · Baltimore Subdivision', defect:'Bearing Overheat — +38°C above threshold', created:'2026-03-20 · 09:04 UTC', reporter:'HABD Sensor Array (Wayside)', status:'open' },
+    { id:'WO-2024-0087', title:'GAUGE ANOMALY ASSESSMENT', location:'GW-109 · Milepost 88.4 · G&W Subsidiary', defect:'Gauge Anomaly — 4.2mm deviation from spec', created:'2026-03-20 · 07:55 UTC', reporter:'Drone Unit DR-12 (AI Detection)', status:'review' },
+  ];
+
+  let woSortField = null, woSortAsc = true;
+  let nextWONum = 93;
+
+  // ── OPS CENTER OPEN/CLOSE ──
+  function openOpsCenter(e) {
+    if(e) e.preventDefault();
+    const el = document.getElementById('ops-overlay');
+    el.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(initOpsCenter, 50);
+  }
+
+  function closeOpsCenter() {
+    document.getElementById('ops-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function initOpsCenter() {
+    updateClock();
+    setInterval(updateClock, 1000);
+    animateCorridorBars();
+    renderWOTable(workOrders);
+    setTimeout(animateAnalyticsBars, 300);
+  }
+
+  function updateClock() {
+    const el = document.getElementById('ops-clock');
+    if(!el) return;
+    const now = new Date();
+    el.textContent = now.toUTCString().split(' ')[4] + ' UTC';
+    const d = document.getElementById('dash-date');
+    if(d) d.textContent = now.toDateString().toUpperCase();
+  }
+
+  // ── SIDEBAR ──
+  function toggleSidebar() {
+    const sb = document.getElementById('ops-sidebar');
+    const btn = document.getElementById('sidebar-toggle-btn');
+    sb.classList.toggle('collapsed');
+    btn.textContent = sb.classList.contains('collapsed') ? '›' : '‹';
+  }
+
+  // ── VIEW SWITCHING ──
+  function switchView(viewId, itemEl) {
+    document.querySelectorAll('.ops-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    itemEl.classList.add('active');
+    if(viewId === 'analytics') setTimeout(animateAnalyticsBars, 100);
+    if(viewId === 'dashboard') setTimeout(animateCorridorBars, 100);
+  }
+
+  // ── CORRIDOR BARS ──
+  function animateCorridorBars() {
+    document.querySelectorAll('.corridor-bar-fill[data-w]').forEach(bar => {
+      bar.style.width = bar.dataset.w;
+    });
+  }
+
+  function animateAnalyticsBars() {
+    document.querySelectorAll('.bc-fill[data-w]').forEach(bar => {
+      bar.style.width = bar.dataset.w;
+    });
+  }
+
+  // ── WORK ORDER TABLE ──
+  const prioOrder = { CRITICAL:0, HIGH:1, MEDIUM:2, LOW:3 };
+  const statusOrder = { 'IN PROGRESS':0, OPEN:1, REVIEW:2, BLOCKED:3, COMPLETE:4 };
+
+  function prioClass(p) {
+    return p === 'CRITICAL' ? 'prio-critical' : p === 'HIGH' ? 'prio-high' : p === 'MEDIUM' ? 'prio-medium' : 'prio-low';
+  }
+
+  function statusClass(s) {
+    if(s==='OPEN') return 'sb-open';
+    if(s==='IN PROGRESS') return 'sb-inprogress';
+    if(s==='REVIEW') return 'sb-review';
+    if(s==='COMPLETE') return 'sb-complete';
+    if(s==='BLOCKED') return 'sb-blocked';
+    return '';
+  }
+
+  function renderWOTable(data) {
+    const tbody = document.getElementById('wo-table-body');
+    tbody.innerHTML = data.map((wo, i) => `
+      <tr onclick="openTaskPanel(${Math.min(i,2)})">
+        <td>${wo.id}</td>
+        <td>${wo.defect}</td>
+        <td class="td-location">${wo.location}</td>
+        <td><span class="prio ${prioClass(wo.priority)}">${wo.priority}</span></td>
+        <td><span class="status-badge ${statusClass(wo.status)}">${wo.status}</span></td>
+        <td>${wo.crew}</td>
+        <td style="font-family:var(--font-mono);font-size:10px;color:var(--steel)">${wo.created}</td>
+      </tr>`).join('');
+    const lbl = document.getElementById('wo-count-label');
+    if(lbl) lbl.textContent = `${data.length} RESULTS`;
+  }
+
+  function filterWorkOrders() {
+    const search = (document.getElementById('wo-search')?.value || '').toLowerCase();
+    const status = (document.getElementById('wo-status-filter')?.value || '').toUpperCase();
+    const priority = (document.getElementById('wo-priority-filter')?.value || '').toUpperCase();
+    let filtered = workOrders.filter(wo => {
+      const matchSearch = !search || wo.id.toLowerCase().includes(search) || wo.defect.toLowerCase().includes(search) || wo.location.toLowerCase().includes(search) || wo.crew.toLowerCase().includes(search);
+      const matchStatus = !status || wo.status === status;
+      const matchPrio = !priority || wo.priority === priority;
+      return matchSearch && matchStatus && matchPrio;
+    });
+    if(woSortField) {
+      filtered.sort((a,b) => {
+        let av = a[woSortField], bv = b[woSortField];
+        if(woSortField==='priority') { av = prioOrder[a.priority]; bv = prioOrder[b.priority]; }
+        if(woSortField==='status') { av = statusOrder[a.status]||99; bv = statusOrder[b.status]||99; }
+        return woSortAsc ? (av < bv ? -1 : av > bv ? 1 : 0) : (av > bv ? -1 : av < bv ? 1 : 0);
+      });
+    }
+    renderWOTable(filtered);
+  }
+
+  function sortWO(field) {
+    if(woSortField === field) woSortAsc = !woSortAsc;
+    else { woSortField = field; woSortAsc = true; }
+    filterWorkOrders();
+  }
+
+  function clearWOFilters() {
+    document.getElementById('wo-search').value = '';
+    document.getElementById('wo-status-filter').value = '';
+    document.getElementById('wo-priority-filter').value = '';
+    woSortField = null;
+    renderWOTable(workOrders);
+  }
+
+  // ── TASK PANEL ──
+  function openTaskPanel(idx) {
+    const data = taskPanelData[idx] || taskPanelData[0];
+    document.getElementById('tp-id').textContent = data.id;
+    document.getElementById('tp-title').textContent = data.title;
+    document.getElementById('tp-location').textContent = data.location;
+    document.getElementById('tp-defect').textContent = data.defect;
+    document.getElementById('tp-created').textContent = data.created;
+    document.getElementById('tp-reporter').textContent = data.reporter;
+    document.getElementById('tp-status-select').value = data.status;
+    document.getElementById('task-backdrop').classList.add('open');
+    document.getElementById('task-panel').classList.add('open');
+  }
+
+  function closeTaskPanel() {
+    document.getElementById('task-backdrop').classList.remove('open');
+    document.getElementById('task-panel').classList.remove('open');
+  }
+
+  function updateTaskStatus() {
+    // Live UI update
+  }
+
+  function removeCrewFromPanel(btn) {
+    btn.closest('.tp-crew-item').remove();
+    showToast('Crew member removed');
+  }
+
+  function addCrewFromPanel() {
+    const sel = document.getElementById('tp-crew-select');
+    if(!sel.value) return;
+    const [name, role] = sel.value.split(' — ');
+    const item = document.createElement('div');
+    item.className = 'tp-crew-item';
+    item.innerHTML = `<div><div class="tp-crew-name">${name}</div><div class="tp-crew-role">${(role||'CREW MEMBER').toUpperCase()}</div></div><button class="tp-crew-remove" onclick="removeCrewFromPanel(this)">×</button>`;
+    document.getElementById('tp-crew-list').appendChild(item);
+    sel.value = '';
+    showToast('Crew member assigned');
+  }
+
+  function saveTaskPanel() {
+    closeTaskPanel();
+    showToast('Work order updated successfully');
+  }
+
+  // ── CREATE DIALOG ──
+  function openCreateDialog() {
+    document.getElementById('create-dialog').classList.add('open');
+  }
+
+  function closeCreateDialog() {
+    document.getElementById('create-dialog').classList.remove('open');
+  }
+
+  function submitCreateOrder() {
+    const priority = document.getElementById('cf-priority').value;
+    const defect = document.getElementById('cf-defect').value;
+    const corridor = document.getElementById('cf-corridor').value.split(' · ')[0];
+    const milepost = document.getElementById('cf-milepost').value || 'MP —';
+    const crew = document.getElementById('cf-crew').value || 'Unassigned';
+    const newId = 'WO-2024-0' + nextWONum++;
+    const now = new Date();
+    const created = `${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    workOrders.unshift({ id:newId, defect, location:`${corridor} · ${milepost}`, corridor, priority, status:'OPEN', crew, created });
+    // Update counts
+    const openEl = document.getElementById('mc-open');
+    if(openEl) openEl.textContent = parseInt(openEl.textContent)+1;
+    const sbCount = document.getElementById('sb-wo-count');
+    if(sbCount) sbCount.textContent = parseInt(sbCount.textContent)+1;
+    renderWOTable(workOrders);
+    closeCreateDialog();
+    showToast(`${newId} created · ${priority} · ${defect}`);
+    // Reset form
+    document.getElementById('cf-milepost').value = '';
+    document.getElementById('cf-notes').value = '';
+    document.getElementById('cf-priority').value = 'MEDIUM';
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('ops-toast');
+    t.textContent = '✓ ' + msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Open from hero CTA if needed
+  window.openOpsCenter = openOpsCenter;
+</script>
+
+<script>
+  // Intersection observer for fade-in animations
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+  // Animate PFRI bars on scroll
+  const pfriObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('.pfri-bar-fill').forEach(bar => {
+          bar.style.width = bar.className.includes('fill-green') ? '28%'
+                          : bar.className.includes('fill-amber') ? '61%' : '87%';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const pfriPanel = document.querySelector('.pfri-panel');
+  if (pfriPanel) pfriObs.observe(pfriPanel);
+</script>
+</body>
+</html>
