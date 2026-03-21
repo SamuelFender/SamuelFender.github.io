@@ -865,10 +865,96 @@
     transform: translateY(0);
   }
 
+  /* ── HAMBURGER BUTTON ── */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: 1px solid var(--rail-border);
+    cursor: pointer;
+    padding: 8px;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+  }
+
+  .nav-hamburger:hover { border-color: var(--amber); }
+
+  .nav-hamburger span {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background: var(--steel-light);
+    transition: transform 0.25s ease, opacity 0.25s ease, background 0.2s;
+  }
+
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); background: var(--amber); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--amber); }
+
+  /* ── MOBILE DRAWER ── */
+  .nav-drawer {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0; right: 0;
+    z-index: 99;
+    background: rgba(10,11,13,0.98);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--rail-border);
+    flex-direction: column;
+    padding: 8px 0 16px;
+    transform: translateY(-8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+
+  .nav-drawer.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .nav-drawer a {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--steel);
+    text-decoration: none;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--rail-border);
+    display: block;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .nav-drawer a:last-child { border-bottom: none; }
+  .nav-drawer a:hover { color: var(--amber); background: rgba(245,166,35,0.05); }
+
+  .nav-drawer .drawer-ops-btn {
+    margin: 12px 20px 0;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+    padding: 13px 20px;
+    text-align: center;
+    letter-spacing: 2px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(245,166,35,0.06);
+  }
+
+  .nav-drawer .drawer-ops-btn:hover { background: rgba(245,166,35,0.14); }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
     nav { padding: 0 20px; }
     nav .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+    .nav-drawer { display: flex; }
     section { padding: 60px 20px; }
     #hero { padding: 100px 20px 60px; }
     h1 { font-size: 64px; }
@@ -902,14 +988,26 @@
     <li><a href="#metrics">Metrics</a></li>
     <li><a href="#" onclick="openOpsCenter(event)" style="color:var(--amber);border:1px solid var(--amber);padding:6px 14px;">⬡ OPS CENTER</a></li>
   </ul>
+  <button class="nav-hamburger" id="nav-hamburger" onclick="toggleDrawer()" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE DRAWER -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="#framework" onclick="closeDrawer()">Framework</a>
+  <a href="#emergency" onclick="closeDrawer()">Response</a>
+  <a href="#network" onclick="closeDrawer()">Network</a>
+  <a href="#metrics" onclick="closeDrawer()">Metrics</a>
+  <a href="#" class="drawer-ops-btn" onclick="closeDrawer(); openOpsCenter(event)">⬡ OPS CENTER</a>
+</div>
 
 <!-- HERO -->
 <section id="hero">
   <div class="hero-scan-line"></div>
   <div class="hero-tag">Wabtec × RailGuard AI — PRD v2.0</div>
   <h1>DETECT.<br/><span class="accent">DECIDE.</span><br/>PROTECT.</h1>
-  <p class="hero-sub">Autonomous drone intelligence, edge-computing diagnostics, and AI-driven predictive analytics — transforming America's freight rail from reactive crisis to proactive safety.</p>
+  <p class="hero-sub">Autonomous intelligence, edge-computing diagnostics, and AI-driven predictive analytics — transforming America's freight rail from reactive crisis to proactive safety.</p>
   <div class="hero-cta-row">
     <a href="#framework" class="btn-primary">View Framework</a>
     <a href="#features" class="btn-outline">Explore Features</a>
@@ -960,7 +1058,7 @@
     <div class="dda-card">
       <div class="dda-num">01</div>
       <h3>DETECT</h3>
-      <p>Autonomous drones patrol assigned rail corridors on scheduled intervals, capturing high-resolution visual, thermal, and LiDAR data. Simultaneously, onboard sensors monitor bearing temperature, vibration, brake pressure, and structural stress across every locomotive and freight car — mile by mile.</p>
+      <p>Autonomous units patrol assigned rail corridors on scheduled intervals, capturing high-resolution visual, thermal, and LiDAR data. Simultaneously, onboard sensors monitor bearing temperature, vibration, brake pressure, and structural stress across every locomotive and freight car — mile by mile.</p>
     </div>
     <div class="dda-card">
       <div class="dda-num">02</div>
@@ -969,13 +1067,13 @@
     </div>
     <div class="dda-card">
       <div class="dda-num">03</div>
-      <h3>ACT</h3>
-      <p>Automatically dispatches prioritized alerts to maintenance crews, triggers parts procurement, generates work orders in existing CMMS systems, and — when PFRI reaches critical threshold — activates stabilization mechanisms to slow or halt the train and dispatches emergency engineers en route.</p>
+      <h3>EXPLAIN</h3>
+      <p>Every decision and alert is logged with full traceability: sensor readings, PFRI scores, recommended and executed actions, and outcomes. The unified dashboard provides regulators, safety managers, and rail operators with a transparent, auditable record of fleet and track health across the entire network.</p>
     </div>
     <div class="dda-card">
       <div class="dda-num">04</div>
-      <h3>EXPLAIN</h3>
-      <p>Every decision and alert is logged with full traceability: sensor readings, PFRI scores, recommended and executed actions, and outcomes. The unified dashboard provides regulators, safety managers, and rail operators with a transparent, auditable record of fleet and track health across the entire network.</p>
+      <h3>ACT</h3>
+      <p>Automatically dispatches prioritized alerts to maintenance crews, triggers parts procurement, generates work orders in existing CMMS systems, and — when PFRI reaches critical threshold — activates stabilization mechanisms to slow or halt the train and dispatches emergency engineers en route.</p>
     </div>
   </div>
 </section>
@@ -1017,8 +1115,8 @@
         <div class="flow-dot">04</div>
         <div class="flow-line"></div>
         <div class="flow-content">
-          <h4>DRONE SECONDARY ASSESSMENT</h4>
-          <p>Nearest available drone is rerouted to the incident area for aerial assessment — providing engineers visual confirmation of the threat before they arrive on site.</p>
+          <h4>SECONDARY ASSESSMENT</h4>
+          <p>Nearest available unit is rerouted to the incident area for aerial assessment — providing engineers visual confirmation of the threat before they arrive on site.</p>
         </div>
       </div>
       <div class="flow-step">
@@ -1062,11 +1160,11 @@
         <p>CRITICAL ALERT — NS-3347 · Milepost 447.2<br/>
         Bearing temperature +38°C above threshold<br/>
         Stabilization engaged · Engineers dispatched · ETA 22 min<br/>
-        Drone assessment en route</p>
+        Aerial assessment en route</p>
       </div>
 
       <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--rail-border);">
-        <div style="font-family:var(--font-mono);font-size:10px;color:var(--steel);letter-spacing:1px;margin-bottom:12px;">PREVENTIVE TRACK HEALTH — WEEKLY DRONE REPORT</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--steel);letter-spacing:1px;margin-bottom:12px;">PREVENTIVE TRACK HEALTH — WEEKLY AERIAL REPORT</div>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
           <div style="background:var(--rail-black);padding:12px 16px;flex:1;min-width:120px;">
             <div style="font-family:var(--font-head);font-size:28px;color:var(--green-ok);">847</div>
@@ -1192,7 +1290,7 @@
     <div class="footer-col">
       <h4>Product</h4>
       <ul>
-        <li>Autonomous Drone Patrol</li>
+        <li>Autonomous Patrol</li>
         <li>Edge AI Diagnostic Units</li>
         <li>PFRI Risk Index</li>
         <li>Unified Cloud Dashboard</li>
@@ -2671,7 +2769,7 @@
             <div class="is-value" style="color:var(--red-alert)">2</div>
           </div>
           <div class="is-item">
-            <div class="is-label">Last Drone Sweep</div>
+            <div class="is-label">Last Sweep</div>
             <div class="is-value" style="color:var(--steel-light);font-size:15px;font-family:var(--font-mono)">14m ago</div>
           </div>
         </div>
@@ -2811,7 +2909,7 @@
         <div class="alert-item al-info">
           <span class="alert-icon">🔵</span>
           <div>
-            <div class="alert-main-title">DRONE SWEEP COMPLETE — UP-1204</div>
+            <div class="alert-main-title">SWEEP COMPLETE — UP-1204</div>
             <div class="alert-main-sub">847 miles scanned · 2 minor defects logged · Sector A–F all nominal</div>
           </div>
           <div class="alert-meta">
@@ -3031,7 +3129,7 @@
       <div class="tp-field"><span class="tp-key">Defect Type</span><span class="tp-val" id="tp-defect">Broken Rail — Surface fatigue fracture</span></div>
       <div class="tp-field"><span class="tp-key">Priority</span><span class="tp-val" id="tp-prio-cell"><span class="prio prio-critical">CRITICAL</span></span></div>
       <div class="tp-field"><span class="tp-key">Created</span><span class="tp-val" id="tp-created">2026-03-20 · 08:41 UTC</span></div>
-      <div class="tp-field"><span class="tp-key">Reported By</span><span class="tp-val" id="tp-reporter">Drone Unit DR-07 (AI Detection)</span></div>
+      <div class="tp-field"><span class="tp-key">Reported By</span><span class="tp-val" id="tp-reporter">Unit DR-07 (AI Detection)</span></div>
     </div>
 
     <div class="tp-section">
@@ -3087,7 +3185,7 @@
         <div class="tp-timeline-item">
           <div class="tp-tl-dot red"></div>
           <div>
-            <div class="tp-tl-time">08:41 UTC · Drone DR-07</div>
+            <div class="tp-tl-time">08:41 UTC · Unit DR-07</div>
             <div class="tp-tl-desc">Critical defect detected — surface fatigue fracture at MP 447.2</div>
           </div>
         </div>
@@ -3220,9 +3318,9 @@
   ];
 
   const taskPanelData = [
-    { id:'WO-2024-0091', title:'BROKEN RAIL REPAIR', location:'NS-3347 · Milepost 447.2 · Crescent Corridor', defect:'Broken Rail — Surface fatigue fracture', created:'2026-03-20 · 08:41 UTC', reporter:'Drone Unit DR-07 (AI Detection)', status:'inprogress' },
+    { id:'WO-2024-0091', title:'BROKEN RAIL REPAIR', location:'NS-3347 · Milepost 447.2 · Crescent Corridor', defect:'Broken Rail — Surface fatigue fracture', created:'2026-03-20 · 08:41 UTC', reporter:'Unit DR-07 (AI Detection)', status:'inprogress' },
     { id:'WO-2024-0089', title:'BEARING OVERHEAT RESPONSE', location:'CSX-8872 · Milepost 221.0 · Baltimore Subdivision', defect:'Bearing Overheat — +38°C above threshold', created:'2026-03-20 · 09:04 UTC', reporter:'HABD Sensor Array (Wayside)', status:'open' },
-    { id:'WO-2024-0087', title:'GAUGE ANOMALY ASSESSMENT', location:'GW-109 · Milepost 88.4 · G&W Subsidiary', defect:'Gauge Anomaly — 4.2mm deviation from spec', created:'2026-03-20 · 07:55 UTC', reporter:'Drone Unit DR-12 (AI Detection)', status:'review' },
+    { id:'WO-2024-0087', title:'GAUGE ANOMALY ASSESSMENT', location:'GW-109 · Milepost 88.4 · G&W Subsidiary', defect:'Gauge Anomaly — 4.2mm deviation from spec', created:'2026-03-20 · 07:55 UTC', reporter:'Unit DR-12 (AI Detection)', status:'review' },
   ];
 
   let woSortField = null, woSortAsc = true;
@@ -3446,6 +3544,36 @@
 
   // Open from hero CTA if needed
   window.openOpsCenter = openOpsCenter;
+</script>
+
+<script>
+  // ── NAV DRAWER ──
+  function toggleDrawer() {
+    const drawer = document.getElementById('nav-drawer');
+    const btn = document.getElementById('nav-hamburger');
+    const isOpen = drawer.classList.contains('open');
+    if (isOpen) {
+      drawer.classList.remove('open');
+      btn.classList.remove('open');
+    } else {
+      drawer.classList.add('open');
+      btn.classList.add('open');
+    }
+  }
+
+  function closeDrawer() {
+    document.getElementById('nav-drawer').classList.remove('open');
+    document.getElementById('nav-hamburger').classList.remove('open');
+  }
+
+  // Close drawer when clicking outside
+  document.addEventListener('click', function(e) {
+    const drawer = document.getElementById('nav-drawer');
+    const btn = document.getElementById('nav-hamburger');
+    if (drawer.classList.contains('open') && !drawer.contains(e.target) && !btn.contains(e.target)) {
+      closeDrawer();
+    }
+  });
 </script>
 
 <script>
